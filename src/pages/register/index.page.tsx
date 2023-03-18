@@ -7,6 +7,7 @@ import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Container, Form, FormError, Header } from "./styles"
+import { AxiosError } from "axios"
 
 
 const registerFormSchema = z.object({
@@ -44,7 +45,12 @@ export default function Register() {
                 username: data.username,
             })
         } catch (error) {
-            console.log(error)
+            if (error instanceof AxiosError && error?.response?.data?.message) {
+                alert(error.response.data.message)
+                return
+            }
+
+            console.error(error)
         }
     }
 
