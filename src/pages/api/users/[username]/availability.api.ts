@@ -32,7 +32,7 @@ export default async function handle(
     const isPastDate = referenceDate.endOf('day').isBefore(new Date())    // it's a good idea to validate in every area of the application, not just client side
 
     if (isPastDate) {
-        return res.json({availabity: []})
+        return res.json({possibleTimes: [], availableTimes: []})
     }
 
 
@@ -44,7 +44,7 @@ export default async function handle(
     })
 
     if (!userAvailability) {
-        return res.json({availabity: []})
+        return res.json({possibleTimes: [], availableTimes: []})
     }
 
     const { time_start_in_minutes, time_end_in_minutes } = userAvailability
@@ -58,5 +58,22 @@ export default async function handle(
     },
     )
 
-    return res.json({possibleTimes})
+    const blockedTimes = await prisma.scheduling.findMany({
+        select: {
+            date: true,
+        },
+        where: {
+            user_id: user.id,
+            date: {
+                gte: referenceDate.set('hour', startHour).toDate(), //gte = greater than or equal
+                lte: referenceDate.set('hour', endHour).toDate(),
+            }
+        },
+    })
+
+    const availableTimes = possibleTimes.filter(time => {
+        return !blockedTimes.some(blockedTime => blockedTime.date.getHours() === time,)
+    })
+
+    return res.json({possibleTimes, availableTimes})
 }
