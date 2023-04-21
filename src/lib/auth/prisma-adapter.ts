@@ -4,11 +4,10 @@ import { parseCookies, destroyCookie } from 'nookies'
 import { NextApiRequest, NextApiResponse, NextPageContext } from 'next'
 
 export function PrismaAdapter(
-  req: NextApiRequest | NextPageContext['req'], 
-  res: NextApiResponse | NextPageContext['res']
-  ): Adapter {
+  req: NextApiRequest | NextPageContext['req'],
+  res: NextApiResponse | NextPageContext['res'],
+): Adapter {
   return {
-
     async createUser(user) {
       const { '@ignitecall:userId': userIdOnCookies } = parseCookies({ req })
 
@@ -18,19 +17,19 @@ export function PrismaAdapter(
 
       const prismaUser = await prisma.user.update({
         where: {
-          id: userIdOnCookies
+          id: userIdOnCookies,
         },
         data: {
           name: user.name,
           email: user.email,
           avatar_url: user.avatar_url,
-        }
+        },
       })
 
       destroyCookie({ res }, '@ignitecall:userId', {
         path: '/',
       })
-      
+
       return {
         id: prismaUser.id,
         name: prismaUser.name,
@@ -82,7 +81,7 @@ export function PrismaAdapter(
         avatar_url: user.avatar_url!,
       }
     },
-    
+
     async getUserByAccount({ providerAccountId, provider }) {
       const account = await prisma.account.findUnique({
         where: {
@@ -221,9 +220,9 @@ export function PrismaAdapter(
     async deleteSession(sessionToken) {
       await prisma.session.delete({
         where: {
-          session_token: sessionToken
-        }
+          session_token: sessionToken,
+        },
       })
-    }
+    },
   }
 }
