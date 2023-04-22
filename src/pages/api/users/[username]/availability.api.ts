@@ -58,7 +58,9 @@ export default async function handle(
     },
   )
 
-  const blockedTimes = await prisma.scheduling.findMany({
+  /*   Vercel timezone messes with the following code
+
+    const blockedTimes = await prisma.scheduling.findMany({
     select: {
       date: true,
     },
@@ -79,6 +81,25 @@ export default async function handle(
     const isTimeInPast = referenceDate.set('hour', time).isBefore(new Date())
 
     return !isTimeBlocked && !isTimeInPast
+  }) */
+
+  // Vercel timezone fix
+
+  const blockedTimes = await prisma.scheduling.findMany({
+    select: {
+      date: true,
+    },
+    where: {
+      user_id: user.id,
+      date: {
+        gte: referenceDate.startOf('day').toDate(),
+        lte: referenceDate.endOf('day').toDate(),
+      },
+    },
+  })
+
+  const availableTimes = blockedTimes.map((schedules) => {
+    return schedules.date
   })
 
   return res.json({ possibleTimes, availableTimes })
