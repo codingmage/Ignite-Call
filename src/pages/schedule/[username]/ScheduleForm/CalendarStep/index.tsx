@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 
 interface Availability {
   possibleTimes: number[]
-  availableTimes: number[]
+  unavailableTimes: number[]
 }
 
 interface CalendarStepProps {
@@ -59,9 +59,11 @@ export function CalendarStep({ onSelectDateTime }: CalendarStepProps) {
 
   // Vercel timezone fix
 
-  const unavailableTimes = availability?.availableTimes.map((availableTime) => {
-    return dayjs(availableTime).get('hour')
-  })
+  const unavailableTimes = availability?.unavailableTimes.map(
+    (unavailableTime) => {
+      return dayjs(unavailableTime).get('hour')
+    },
+  )
 
   function handleSelectTime(hour: number) {
     const dateWithTime = dayjs(selectedDate)
